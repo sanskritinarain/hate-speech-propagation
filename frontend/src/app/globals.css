@@ -2,30 +2,74 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
 :root {
-  --background: #0f172a;
-  --foreground: #f8fafc;
+  --bg-base: #fdf8f2;
+  --bg-surface: #fef9f3;
+  --bg-card: #fffcf8;
+  --bg-muted: #f5ede0;
+  --border-warm: #e8d9c4;
+  --border-light: #f0e4d0;
+  --text-primary: #2d1f0e;
+  --text-secondary: #6b4f32;
+  --text-muted: #a08060;
+  --accent-amber: #d97706;
+  --accent-amber-light: #fef3c7;
+  --accent-orange: #ea580c;
+  --accent-rose: #e11d48;
+  --accent-emerald: #059669;
+  --accent-indigo: #4f46e5;
+}
+
+* {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
 body {
-  color: var(--foreground);
-  background: radial-gradient(circle at top right, #1e1b4b 0%, #0f172a 50%, #020617 100%);
+  color: var(--text-primary);
+  background-color: var(--bg-base);
+  background-image: 
+    radial-gradient(ellipse at 10% 0%, rgba(251, 191, 36, 0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 90% 0%, rgba(234, 88, 12, 0.04) 0%, transparent 50%),
+    linear-gradient(180deg, #fdf8f2 0%, #faf4ec 50%, #f5ede0 100%);
   min-height: 100vh;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 }
 
-/* Custom scrollbars */
+/* Warm Custom scrollbars */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #0f172a;
+  background: #f0e4d0;
 }
 ::-webkit-scrollbar-thumb {
-  background: #334155;
-  border-radius: 4px;
+  background: #d4b896;
+  border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #475569;
+  background: #b8956e;
+}
+
+/* Warm card base */
+.warm-card {
+  background: linear-gradient(135deg, #fffcf8 0%, #fef8f0 100%);
+  border: 1px solid #e8d9c4;
+  border-radius: 1rem;
+  box-shadow: 0 1px 3px rgba(180, 120, 60, 0.08), 0 4px 12px rgba(180, 120, 60, 0.05);
+}
+
+.warm-card:hover {
+  box-shadow: 0 2px 8px rgba(180, 120, 60, 0.12), 0 8px 24px rgba(180, 120, 60, 0.08);
+}
+
+/* Subtle paper texture for cards */
+.paper-card {
+  background: #fffcf8;
+  border: 1px solid #e8d9c4;
+  border-radius: 1rem;
+  box-shadow: 
+    0 1px 0px #f0e4d0 inset,
+    0 2px 8px rgba(160, 100, 40, 0.08);
 }

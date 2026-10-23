@@ -1,3 +1,122 @@
+export interface ObservedComment {
+  comment_id: string;
+  author?: string;
+  text: string;
+  created_at?: string;
+  like_count?: number;
+  parent_id?: string;
+  is_root?: boolean;
+}
+
+export interface SourceRetrievalResult {
+  status: "SUCCESS" | "METADATA_ONLY" | "CREDENTIALS_REQUIRED" | "UNSUPPORTED_PLATFORM" | "POST_NOT_FOUND" | "RATE_LIMITED" | "ERROR";
+  platform: string;
+  platform_label: string;
+  post_id?: string;
+  canonical_url: string;
+  retrieval_timestamp: string;
+  provenance: string;
+  title?: string;
+  text?: string;
+  author?: string;
+  published_at?: string;
+  metrics: Record<string, any>;
+  observed_comments: ObservedComment[];
+  missing_fields: string[];
+  has_sufficient_cascade_data: boolean;
+  observation_window_mins?: number;
+  credentials_configured: boolean;
+  error_message?: string;
+  credentials_help?: string;
+}
+
+export interface ContentCategoryScores {
+  hate_speech: number;
+  offensive_language: number;
+  neither: number;
+}
+
+export interface ContentAnalysisResponse {
+  status: "CLASSIFIED" | "MODEL_UNAVAILABLE";
+  primary_category: "hate_speech" | "offensive_language" | "neither";
+  category_label: string;
+  severity: "HIGH" | "MODERATE" | "LOW";
+  category_scores: ContentCategoryScores;
+  hate_intensity_score: number;
+  model_provenance: string;
+  evaluation_benchmark: string;
+  limitations: string;
+}
+
+export interface PropagationSignalFactor {
+  feature: string;
+  label: string;
+  impact: "high_risk" | "moderate_risk" | "low_risk";
+  description: string;
+}
+
+export interface PropagationPredictionResult {
+  status: "AVAILABLE" | "UNAVAILABLE";
+  unavailability_reason?: string;
+  observation_window_cutoff: string;
+  observed_replies_analyzed: number;
+  observed_time_span_mins?: number;
+  observed_mean_hate?: number;
+  observed_toxic_ratio?: number;
+  observed_user_diversity?: number;
+  observed_velocity_per_min?: number;
+
+  escalation_risk?: "HIGH" | "MODERATE" | "LOW";
+  escalation_probability?: number;
+  predicted_future_reply_volume?: number;
+  estimated_total_cascade_size?: number;
+  prediction_interval?: {
+    lower_bound: number;
+    upper_bound: number;
+  };
+  prediction_interval_method?: string;
+  cascade_reach_tier?: string;
+  diagnostic_factors: PropagationSignalFactor[];
+  model_provenance: string;
+  model_limitations: string;
+}
+
+export interface PipelineAnalysisResponse {
+  source: SourceRetrievalResult;
+  content_analysis: ContentAnalysisResponse;
+  propagation_forecast: PropagationPredictionResult;
+  provenance_summary: string;
+  execution_timestamp: string;
+}
+
+export interface BenchmarkThreadItem {
+  thread_id: string;
+  root_text: string;
+  platform: string;
+  early_reply_count: number;
+  early_time_span_mins: number;
+  early_mean_hate: number;
+  early_hate_ratio: number;
+  target_high_escalation: number;
+  target_future_volume: number;
+  category_label: string;
+}
+
+export interface CredentialsStatusResponse {
+  status: string;
+  platforms: {
+    youtube: boolean;
+    reddit: boolean;
+    twitter: boolean;
+  };
+  instructions: {
+    youtube: string;
+    reddit: string;
+    twitter: string;
+  };
+}
+
+// Legacy Compatibility Types
 export interface EarlyPostAnalysisRequest {
   root_text: string;
   platform?: string;
@@ -75,6 +194,7 @@ export interface ModelMetadataResponse {
     rmse?: number;
     r2?: number;
   };
+  content_metrics?: Record<string, any>;
   feature_importances: Array<{
     feature: string;
     importance: number;

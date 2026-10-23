@@ -5,32 +5,30 @@ import { Header } from "@/components/Header";
 import { DemoModeBanner } from "@/components/DemoModeBanner";
 import { PredictionForm } from "@/components/PredictionForm";
 import { ResultsDashboard } from "@/components/ResultsDashboard";
-import { PropagationCharts } from "@/components/PropagationCharts";
 import { ModelPerformanceSection } from "@/components/ModelPerformanceSection";
 import { DatasetMethodology } from "@/components/DatasetMethodology";
 import { ResponsibleUseModal } from "@/components/ResponsibleUseModal";
 
-import { 
-  fetchHealth, 
-  fetchModelMetadata, 
-  predictPropagation 
+import {
+  fetchHealth,
+  fetchModelMetadata,
+  analyzeSource
 } from "@/lib/api";
-import { 
-  EarlyPostAnalysisRequest, 
-  PropagationPredictionResponse, 
-  ModelMetadataResponse 
+import {
+  PipelineAnalysisResponse,
+  ModelMetadataResponse
 } from "@/types/prediction";
-import { AlertCircle, LineChart, Award, BookOpen } from "lucide-react";
+import { AlertCircle, Award, BookOpen, RefreshCw } from "lucide-react";
 
 export default function Home() {
   const [backendOnline, setBackendOnline] = useState<boolean>(false);
   const [modelMode, setModelMode] = useState<"real_model_inference" | "synthetic_demo_mode" | "uninitialized">("uninitialized");
   const [metadata, setMetadata] = useState<ModelMetadataResponse | null>(null);
-  const [prediction, setPrediction] = useState<PropagationPredictionResponse | null>(null);
+  const [pipelineResult, setPipelineResult] = useState<PipelineAnalysisResponse | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [isResponsibleUseOpen, setIsResponsibleUseOpen] = useState<boolean>(false);
-  const [activeTab, setActiveTab] = useState<"charts" | "metrics" | "methodology">("charts");
+  const [activeTab, setActiveTab] = useState<"metrics" | "methodology" | "none">("none");
 
   const initData = async () => {
     try {
@@ -41,27 +39,10 @@ export default function Home() {
 
       const meta = await fetchModelMetadata().catch(() => null);
       if (meta) setMetadata(meta);
-
-      setLoading(true);
-      const initialPred = await predictPropagation({
-        root_text: "These illegal foreigners are destroying our nation, why is nobody taking direct action against them?!",
-        platform: "twitter",
-        root_hate_score: 0.72,
-        early_reply_count: 15,
-        early_time_span_mins: 20.0,
-        early_mean_hate: 0.42,
-        early_max_hate: 0.85,
-        early_std_hate: 0.19,
-        early_hate_ratio: 0.35,
-        early_user_diversity: 0.80,
-      });
-      setPrediction(initialPred);
     } catch {
       setBackendOnline(false);
       setModelMode("synthetic_demo_mode");
-      setError("Cannot reach backend on port 8001.");
-    } finally {
-      setLoading(false);
+      setError("Cannot reach backend server on port 8001.");
     }
   };
 
@@ -69,13 +50,12 @@ export default function Home() {
     initData();
   }, []);
 
-  const handlePredict = async (data: EarlyPostAnalysisRequest) => {
+  const handlePredict = async (inputSource: string) => {
     setLoading(true);
     setError(null);
     try {
-      const res = await predictPropagation(data);
-      setPrediction(res);
-      setModelMode(res.mode);
+      const res = await analyzeSource(inputSource);
+      setPipelineResult(res);
     } catch (err: any) {
       setError(err.message || "Prediction error");
     } finally {
@@ -84,7 +64,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100 selection:bg-indigo-500">
+    <div className="min-h-screen flex flex-col">
       <Header
         onOpenResponsibleUse={() => setIsResponsibleUseOpen(true)}
         backendOnline={backendOnline}
@@ -93,55 +73,49 @@ export default function Home() {
 
       <DemoModeBanner mode={modelMode} />
 
-      <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-6 space-y-6">
+      <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-8 space-y-6">
+        {/* Error Banner */}
         {error && (
-          <div className="bg-rose-950/40 border border-rose-800/60 px-4 py-2 rounded-xl flex items-center justify-between text-xs text-rose-300">
+          <div className="bg-rose-50 border border-rose-200 px-4 py-2.5 rounded-xl flex items-center justify-between text-xs text-rose-700">
             <div className="flex items-center space-x-2">
-              <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
+              <AlertCircle className="w-4 h-4 text-rose-500 shrink-0" />
               <span>{error}</span>
             </div>
-            <button onClick={initData} className="underline hover:text-white">Retry</button>
+            <button
+              onClick={initData}
+              className="flex items-center gap-1 text-rose-600 hover:text-rose-800 font-medium underline"
+            >
+              <RefreshCw className="w-3 h-3" /> Retry
+            </button>
           </div>
         )}
 
-        {/* Primary Interactive Workspace: Form on Left, Output on Right */}
+        {/* Primary Workspace */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-          <div className="lg:col-span-6">
+          <div className="lg:col-span-5">
             <PredictionForm
               onSubmit={handlePredict}
               loading={loading}
             />
           </div>
 
-          <div className="lg:col-span-6">
+          <div className="lg:col-span-7">
             <ResultsDashboard
-              prediction={prediction}
+              pipelineResult={pipelineResult}
               loading={loading}
             />
           </div>
         </div>
 
-        {/* Clean Secondary Navigation Tabs (Keeps page uncluttered) */}
+        {/* Secondary Tabs */}
         <div className="pt-2">
-          <div className="flex items-center justify-center space-x-2 border-b border-slate-800/80 pb-3">
+          <div className="flex items-center justify-center gap-2 border-b border-amber-100 pb-3">
             <button
-              onClick={() => setActiveTab("charts")}
-              className={`flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-medium transition ${
-                activeTab === "charts"
-                  ? "bg-indigo-600 text-white shadow-sm"
-                  : "bg-slate-900 text-slate-400 hover:text-slate-200 border border-slate-800"
-              }`}
-            >
-              <LineChart className="w-3.5 h-3.5" />
-              <span>Cascade Dynamics & Projections</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab("metrics")}
-              className={`flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-medium transition ${
+              onClick={() => setActiveTab(activeTab === "metrics" ? "none" : "metrics")}
+              className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-semibold transition border ${
                 activeTab === "metrics"
-                  ? "bg-indigo-600 text-white shadow-sm"
-                  : "bg-slate-900 text-slate-400 hover:text-slate-200 border border-slate-800"
+                  ? "bg-amber-600 text-white border-amber-600 shadow-md shadow-amber-200"
+                  : "bg-white text-stone-500 border-stone-200 hover:border-amber-300 hover:text-amber-700"
               }`}
             >
               <Award className="w-3.5 h-3.5" />
@@ -149,11 +123,11 @@ export default function Home() {
             </button>
 
             <button
-              onClick={() => setActiveTab("methodology")}
-              className={`flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-medium transition ${
+              onClick={() => setActiveTab(activeTab === "methodology" ? "none" : "methodology")}
+              className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-semibold transition border ${
                 activeTab === "methodology"
-                  ? "bg-indigo-600 text-white shadow-sm"
-                  : "bg-slate-900 text-slate-400 hover:text-slate-200 border border-slate-800"
+                  ? "bg-amber-600 text-white border-amber-600 shadow-md shadow-amber-200"
+                  : "bg-white text-stone-500 border-stone-200 hover:border-amber-300 hover:text-amber-700"
               }`}
             >
               <BookOpen className="w-3.5 h-3.5" />
@@ -161,25 +135,24 @@ export default function Home() {
             </button>
           </div>
 
-          {/* Tab Content Display */}
           <div className="mt-4">
-            {activeTab === "charts" && prediction && (
-              <PropagationCharts
-                timeline={prediction.timeline_projection}
-                featureImportances={metadata?.feature_importances}
-              />
-            )}
-
             {activeTab === "metrics" && (
               <ModelPerformanceSection metadata={metadata} />
             )}
-
             {activeTab === "methodology" && (
               <DatasetMethodology />
             )}
           </div>
         </div>
       </main>
+
+      {/* Footer */}
+      <footer className="border-t border-amber-100 bg-amber-50/40 py-4 mt-4">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-stone-400">
+          <span>Propagation Predictor — Research Prototype</span>
+          <span>Based on DRAGNET & HEAR frameworks · Davidson et al. 2017 benchmark</span>
+        </div>
+      </footer>
 
       <ResponsibleUseModal
         isOpen={isResponsibleUseOpen}

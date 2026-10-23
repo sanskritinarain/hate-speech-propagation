@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Hate Speech Propagation Prediction System",
-  description: "Proactive prediction of online hate speech intensity and conversation cascade dynamics using early activity signals.",
+  title: "Propagation Predictor — Hate Speech & Cascade Dynamics",
+  description: "Evidence-based source verification, content categorization, and cascade propagation forecasting.",
 };
 
 export default function RootLayout({
@@ -12,8 +12,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
-      <body className="antialiased selection:bg-indigo-500 selection:text-white">
+    <html lang="en">
+      <body className="antialiased selection:bg-amber-500/20 selection:text-amber-900 bg-[#faf7f2] text-stone-900">
         {children}
       </body>
     </html>

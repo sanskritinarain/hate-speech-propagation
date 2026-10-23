@@ -15,25 +15,30 @@ export const Header: React.FC<HeaderProps> = ({
   modelMode
 }) => {
   return (
-    <header className="border-b border-slate-800 bg-slate-900/80 backdrop-blur-md sticky top-0 z-40">
+    <header className="border-b border-amber-200/80 bg-amber-50/80 backdrop-blur-md sticky top-0 z-40 shadow-sm shadow-amber-100/60">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
         <div className="flex items-center space-x-2.5">
-          <div className="p-1.5 rounded-lg bg-indigo-600 text-white shadow-md">
+          <div className="p-1.5 rounded-lg bg-amber-600 text-white shadow-sm shadow-amber-600/30">
             <ShieldAlert className="w-5 h-5" />
           </div>
-          <span className="font-bold text-base text-white tracking-tight">
-            Propagation Predictor
-          </span>
+          <div>
+            <span className="font-extrabold text-base text-stone-800 tracking-tight">
+              Propagation Predictor
+            </span>
+            <span className="text-[10px] text-amber-600 font-medium block leading-none -mt-0.5">
+              Hate Speech Early Warning
+            </span>
+          </div>
         </div>
 
         <div className="flex items-center space-x-3">
-          <div className="flex items-center space-x-1.5 text-xs px-2.5 py-1 rounded-md bg-slate-800/80 border border-slate-700/60">
+          <div className="flex items-center space-x-1.5 text-xs px-2.5 py-1 rounded-full bg-white/80 border border-amber-200 shadow-xs">
             <span
               className={`w-2 h-2 rounded-full ${
-                backendOnline ? "bg-emerald-400" : "bg-rose-400"
+                backendOnline ? "bg-emerald-500 shadow-sm shadow-emerald-400/50" : "bg-rose-400"
               }`}
             />
-            <span className="text-slate-300 font-medium text-[11px]">
+            <span className="text-stone-600 font-medium text-[11px]">
               {backendOnline
                 ? modelMode === "real_model_inference"
                   ? "Model Ready"
@@ -44,9 +49,9 @@ export const Header: React.FC<HeaderProps> = ({
 
           <button
             onClick={onOpenResponsibleUse}
-            className="flex items-center space-x-1 text-xs px-2.5 py-1 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition"
+            className="flex items-center space-x-1.5 text-xs px-3 py-1.5 rounded-full bg-white/80 hover:bg-amber-50 text-stone-600 hover:text-amber-700 border border-amber-200 transition font-medium shadow-xs"
           >
-            <Scale className="w-3.5 h-3.5 text-amber-400" />
+            <Scale className="w-3.5 h-3.5 text-amber-600" />
             <span>Guidelines</span>
           </button>
         </div>

@@ -1,0 +1,54 @@
+{
+  "status": "trained_on_verified_benchmark",
+  "dataset_name": "Davidson et al. (ICWSM 2017) Hate Speech & Offensive Language Benchmark",
+  "taxonomy": {
+    "0": "hate_speech (violence, dehumanization, or incitement targeting protected attributes)",
+    "1": "offensive_language (profanity, aggressive or crude phrasing not targeted at protected classes)",
+    "2": "neither (neutral, civil or benign discourse)"
+  },
+  "sample_counts": {
+    "total": 24783,
+    "train": 19826,
+    "test": 4957
+  },
+  "overall_accuracy": 0.8749,
+  "macro_f1": 0.7381,
+  "per_class_metrics": {
+    "hate_speech": {
+      "precision": 0.3694,
+      "recall": 0.549,
+      "f1_score": 0.4416,
+      "support": 286
+    },
+    "offensive_language": {
+      "precision": 0.96,
+      "recall": 0.8882,
+      "f1_score": 0.9227,
+      "support": 3838
+    },
+    "neither": {
+      "precision": 0.7859,
+      "recall": 0.9256,
+      "f1_score": 0.8501,
+      "support": 833
+    }
+  },
+  "confusion_matrix": [
+    [
+      157,
+      102,
+      27
+    ],
+    [
+      246,
+      3409,
+      183
+    ],
+    [
+      22,
+      40,
+      771
+    ]
+  ],
+  "limitations_and_bias_notes": "Model is calibrated on Twitter discourse. Performance may degrade on platform-specific slang or long-form posts. Known risk: High-frequency African American Vernacular English (AAVE) terms may receive elevated false positive offensive scores as documented in Davidson et al. (2017) and Sap et al. (2019). Use for decision-support only."
+}

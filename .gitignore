@@ -13,10 +13,11 @@ env/
 htmlcov/
 
 # Machine Learning & Data Privacy
-backend/data/*
-!backend/data/.gitkeep
-backend/models/*.joblib
-backend/models/*.pkl
+# NOTE: model files are small (<2MB) and committed for fast cold-start deploys
+# Raw training data (PII) stays excluded
+backend/data/davidson_labeled_data.csv
+backend/data/*.csv
+!backend/data/processed_threads_sample.csv
 temp_*/
 
 # Node & Next.js
@@ -28,10 +29,11 @@ frontend/.vercel
 *.tsbuildinfo
 next-env.d.ts
 
-# Environments and Secrets
+# Environments and Secrets (NEVER commit)
 .env
 .env.local
 .env.*.local
+backend/.env
 *.log
 
 # OS Metadata

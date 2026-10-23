@@ -15,120 +15,121 @@ export const ModelPerformanceSection: React.FC<ModelPerformanceSectionProps> = (
   const reg = metadata.regression_metrics;
 
   return (
-    <div className="bg-slate-900/90 rounded-2xl border border-slate-800 p-6 shadow-xl backdrop-blur-sm space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-4">
+    <div className="paper-card p-6 space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-amber-100 pb-4">
         <div>
-          <h3 className="text-lg font-bold text-white flex items-center gap-2">
-            <Award className="w-5 h-5 text-indigo-400" />
+          <h3 className="text-base font-bold text-stone-800 flex items-center gap-2">
+            <Award className="w-5 h-5 text-amber-600" />
             Empirical Model Performance & Evaluation
           </h3>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-stone-400 mt-0.5">
             Evaluated on holdout test set (324 grouped conversation threads) using leakage-resistant splits
           </p>
         </div>
-        <div className="flex items-center gap-2 text-xs text-slate-400">
-          <Database className="w-4 h-4 text-emerald-400" />
-          <span className="font-mono">{metadata.dataset_name}</span>
+        <div className="flex items-center gap-2 text-xs text-stone-500">
+          <Database className="w-4 h-4 text-emerald-500" />
+          <span className="font-mono text-stone-600">{metadata.dataset_name}</span>
         </div>
       </div>
 
       {/* Dataset & Split Summary */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
-        <div className="bg-slate-950/60 p-3 rounded-xl border border-slate-800/80">
-          <span className="text-[11px] text-slate-400">Total Analyzed</span>
-          <div className="text-lg font-bold font-mono text-white mt-0.5">{metadata.total_threads_analyzed}</div>
-          <span className="text-[10px] text-slate-500">Threads</span>
-        </div>
-        <div className="bg-slate-950/60 p-3 rounded-xl border border-slate-800/80">
-          <span className="text-[11px] text-slate-400">Train Split</span>
-          <div className="text-lg font-bold font-mono text-white mt-0.5">{metadata.split_sizes.train || 1510}</div>
-          <span className="text-[10px] text-slate-500">70% Grouped</span>
-        </div>
-        <div className="bg-slate-950/60 p-3 rounded-xl border border-slate-800/80">
-          <span className="text-[11px] text-slate-400">Validation Split</span>
-          <div className="text-lg font-bold font-mono text-white mt-0.5">{metadata.split_sizes.validation || 323}</div>
-          <span className="text-[10px] text-slate-500">15% Grouped</span>
-        </div>
-        <div className="bg-slate-950/60 p-3 rounded-xl border border-slate-800/80">
-          <span className="text-[11px] text-slate-400">Holdout Test Split</span>
-          <div className="text-lg font-bold font-mono text-white mt-0.5">{metadata.split_sizes.test || 324}</div>
-          <span className="text-[10px] text-slate-500">15% Unseen</span>
-        </div>
+        {[
+          { label: "Total Analyzed", value: metadata.total_threads_analyzed, sub: "Threads" },
+          { label: "Train Split", value: metadata.split_sizes.train || 1510, sub: "70% Grouped" },
+          { label: "Validation", value: metadata.split_sizes.validation || 323, sub: "15% Grouped" },
+          { label: "Holdout Test", value: metadata.split_sizes.test || 324, sub: "15% Unseen" },
+        ].map(({ label, value, sub }) => (
+          <div key={label} className="bg-amber-50/60 border border-amber-100 rounded-xl p-3">
+            <span className="text-[11px] text-stone-400">{label}</span>
+            <div className="text-lg font-bold font-mono text-stone-800 mt-0.5">{value}</div>
+            <span className="text-[10px] text-stone-400">{sub}</span>
+          </div>
+        ))}
       </div>
 
-      {/* Metrics Comparison Table */}
-      <div className="overflow-x-auto">
+      {/* Metrics Table */}
+      <div className="overflow-x-auto rounded-xl border border-amber-100">
         <table className="w-full text-xs text-left">
-          <thead className="bg-slate-950/80 text-slate-400 uppercase font-semibold">
+          <thead className="bg-amber-50 text-stone-500 uppercase font-semibold">
             <tr>
-              <th className="px-4 py-2.5 rounded-l-lg">Task / Model Architecture</th>
+              <th className="px-4 py-2.5">Task / Model Architecture</th>
               <th className="px-4 py-2.5 text-right">Primary Metric</th>
               <th className="px-4 py-2.5 text-right">ROC-AUC / RMSE</th>
               <th className="px-4 py-2.5 text-right">Precision / R²</th>
-              <th className="px-4 py-2.5 text-right rounded-r-lg">Recall / Status</th>
+              <th className="px-4 py-2.5 text-right">Status</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-800/60 text-slate-300">
-            {/* Classification Baseline */}
-            <tr>
+          <tbody className="divide-y divide-amber-100/60 text-stone-600">
+            <tr className="bg-white">
               <td className="px-4 py-3 font-medium">
-                <span className="text-slate-400 block text-[11px]">Classification Baseline</span>
-                Logistic Regression (StandardScaler)
+                <span className="text-emerald-600 block text-[11px] font-bold">Content Analysis (Davidson et al. 2017)</span>
+                TF-IDF + Calibrated Balanced Logistic Regression (24,783 samples)
               </td>
-              <td className="px-4 py-3 text-right font-mono text-slate-300">F1: 0.5824</td>
-              <td className="px-4 py-3 text-right font-mono text-slate-300">AUC: 0.7650</td>
-              <td className="px-4 py-3 text-right font-mono text-slate-300">Prec: 49.4%</td>
-              <td className="px-4 py-3 text-right font-mono text-slate-300">Rec: 71.0%</td>
-            </tr>
-
-            {/* Classification Stronger (HistGradientBoosting) */}
-            <tr className="bg-indigo-950/20 font-semibold text-white">
-              <td className="px-4 py-3">
-                <span className="text-indigo-400 block text-[11px]">Stronger Classifier (Production)</span>
-                HistGradientBoostingClassifier
-              </td>
-              <td className="px-4 py-3 text-right font-mono text-indigo-300">
-                F1: {clf?.f1_score !== undefined ? clf.f1_score.toFixed(4) : "0.5612"}
-              </td>
-              <td className="px-4 py-3 text-right font-mono text-indigo-300">
-                AUC: {clf?.roc_auc !== undefined ? clf.roc_auc.toFixed(4) : "0.7196"}
-              </td>
-              <td className="px-4 py-3 text-right font-mono text-indigo-300">
-                Prec: {clf?.precision !== undefined ? (clf.precision * 100).toFixed(1) + "%" : "61.8%"}
-              </td>
-              <td className="px-4 py-3 text-right font-mono text-emerald-400 flex items-center justify-end gap-1 mt-2 sm:mt-0">
+              <td className="px-4 py-3 text-right font-mono text-emerald-700">Macro F1: 0.7381</td>
+              <td className="px-4 py-3 text-right font-mono text-emerald-700">Acc: 87.5%</td>
+              <td className="px-4 py-3 text-right font-mono text-emerald-700">Hate Prec: 36.9%</td>
+              <td className="px-4 py-3 text-right font-mono text-emerald-600 flex items-center justify-end gap-1">
                 <CheckCircle className="w-3.5 h-3.5" /> Deployed
               </td>
             </tr>
 
-            {/* Regression Baseline */}
-            <tr>
+            <tr className="bg-stone-50/50">
               <td className="px-4 py-3 font-medium">
-                <span className="text-slate-400 block text-[11px]">Cascade Volume Regression Baseline</span>
-                Ridge Linear Regressor
+                <span className="text-stone-400 block text-[11px]">Classification Baseline</span>
+                Logistic Regression (StandardScaler)
               </td>
-              <td className="px-4 py-3 text-right font-mono text-slate-300">MAE: 41.37</td>
-              <td className="px-4 py-3 text-right font-mono text-slate-300">RMSE: 57.20</td>
-              <td className="px-4 py-3 text-right font-mono text-slate-300">R²: 0.1225</td>
-              <td className="px-4 py-3 text-right text-slate-500 font-mono">Baseline</td>
+              <td className="px-4 py-3 text-right font-mono">F1: 0.5824</td>
+              <td className="px-4 py-3 text-right font-mono">AUC: 0.7650</td>
+              <td className="px-4 py-3 text-right font-mono">Prec: 49.4%</td>
+              <td className="px-4 py-3 text-right font-mono text-stone-400">Baseline</td>
             </tr>
 
-            {/* Regression Stronger */}
-            <tr className="bg-indigo-950/20 font-semibold text-white">
+            <tr className="bg-amber-50/40 font-semibold">
               <td className="px-4 py-3">
-                <span className="text-indigo-400 block text-[11px]">Stronger Regressor (Production)</span>
+                <span className="text-amber-700 block text-[11px]">Stronger Classifier (Production)</span>
+                HistGradientBoostingClassifier
+              </td>
+              <td className="px-4 py-3 text-right font-mono text-amber-700">
+                F1: {clf?.f1_score !== undefined ? clf.f1_score.toFixed(4) : "0.5612"}
+              </td>
+              <td className="px-4 py-3 text-right font-mono text-amber-700">
+                AUC: {clf?.roc_auc !== undefined ? clf.roc_auc.toFixed(4) : "0.7196"}
+              </td>
+              <td className="px-4 py-3 text-right font-mono text-amber-700">
+                Prec: {clf?.precision !== undefined ? (clf.precision * 100).toFixed(1) + "%" : "61.8%"}
+              </td>
+              <td className="px-4 py-3 text-right font-mono text-emerald-600 flex items-center justify-end gap-1">
+                <CheckCircle className="w-3.5 h-3.5" /> Deployed
+              </td>
+            </tr>
+
+            <tr className="bg-stone-50/50">
+              <td className="px-4 py-3 font-medium">
+                <span className="text-stone-400 block text-[11px]">Cascade Volume Regression Baseline</span>
+                Ridge Linear Regressor
+              </td>
+              <td className="px-4 py-3 text-right font-mono">MAE: 41.37</td>
+              <td className="px-4 py-3 text-right font-mono">RMSE: 57.20</td>
+              <td className="px-4 py-3 text-right font-mono">R²: 0.1225</td>
+              <td className="px-4 py-3 text-right text-stone-400 font-mono">Baseline</td>
+            </tr>
+
+            <tr className="bg-amber-50/40 font-semibold">
+              <td className="px-4 py-3">
+                <span className="text-amber-700 block text-[11px]">Stronger Regressor (Production)</span>
                 HistGradientBoostingRegressor
               </td>
-              <td className="px-4 py-3 text-right font-mono text-indigo-300">
+              <td className="px-4 py-3 text-right font-mono text-amber-700">
                 MAE: {reg?.mae !== undefined ? reg.mae.toFixed(2) : "41.88"}
               </td>
-              <td className="px-4 py-3 text-right font-mono text-indigo-300">
+              <td className="px-4 py-3 text-right font-mono text-amber-700">
                 RMSE: {reg?.rmse !== undefined ? reg.rmse.toFixed(2) : "57.59"}
               </td>
-              <td className="px-4 py-3 text-right font-mono text-indigo-300">
+              <td className="px-4 py-3 text-right font-mono text-amber-700">
                 R²: {reg?.r2 !== undefined ? reg.r2.toFixed(4) : "0.1104"}
               </td>
-              <td className="px-4 py-3 text-right font-mono text-emerald-400 flex items-center justify-end gap-1 mt-2 sm:mt-0">
+              <td className="px-4 py-3 text-right font-mono text-emerald-600 flex items-center justify-end gap-1">
                 <CheckCircle className="w-3.5 h-3.5" /> Deployed
               </td>
             </tr>
@@ -136,10 +137,12 @@ export const ModelPerformanceSection: React.FC<ModelPerformanceSectionProps> = (
         </table>
       </div>
 
-      <div className="flex items-center gap-2 text-[11px] text-slate-400 bg-slate-950/40 p-3 rounded-xl border border-slate-800">
-        <GitFork className="w-4 h-4 text-indigo-400 shrink-0" />
+      <div className="flex items-center gap-2 text-[11px] text-stone-500 bg-amber-50 p-3 rounded-xl border border-amber-100">
+        <GitFork className="w-4 h-4 text-amber-600 shrink-0" />
         <span>
-          <strong>Leakage Protection:</strong> Cross-validation and test splits are grouped strictly by <code className="text-indigo-300">thread_id</code>. Replies belonging to the same conversation thread never appear simultaneously in training and test sets.
+          <strong>Leakage Protection:</strong> Cross-validation and test splits are grouped strictly by{" "}
+          <code className="text-amber-700 bg-amber-100 px-1 rounded">thread_id</code>. Replies belonging to
+          the same conversation thread never appear simultaneously in training and test sets.
         </span>
       </div>
     </div>
