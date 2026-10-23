@@ -1,0 +1,143 @@
+{
+  "status": "trained_on_verified_dataset",
+  "dataset_name": "DRAGNET Conversation Threads Benchmark (KBS 2023 / ICDMW)",
+  "source_repository": "LCS2-IIITD/Predicting-Hate-Intensity",
+  "cutoff_early_replies": 15,
+  "total_threads_analyzed": 2157,
+  "split_sizes": {
+    "train": 1510,
+    "validation": 323,
+    "test": 324
+  },
+  "features_used": [
+    "root_hate_score",
+    "root_char_len",
+    "root_word_count",
+    "root_has_question",
+    "root_has_exclamation",
+    "early_reply_count",
+    "early_time_span_mins",
+    "early_reply_velocity",
+    "early_mean_hate",
+    "early_max_hate",
+    "early_std_hate",
+    "early_hate_ratio",
+    "early_user_diversity",
+    "escalation_delta"
+  ],
+  "classification": {
+    "task": "Predict Future Hate Escalation (Severe Toxicity Cascade)",
+    "positive_class_ratio": 0.3435,
+    "baseline_logistic_regression": {
+      "accuracy": 0.6636,
+      "precision": 0.4935,
+      "recall": 0.7103,
+      "f1_score": 0.5824,
+      "roc_auc": 0.765,
+      "pr_auc": 0.6513
+    },
+    "stronger_hist_gradient_boosting": {
+      "accuracy": 0.7346,
+      "precision": 0.618,
+      "recall": 0.514,
+      "f1_score": 0.5612,
+      "roc_auc": 0.7196,
+      "pr_auc": 0.5848,
+      "confusion_matrix": [
+        [
+          183,
+          34
+        ],
+        [
+          52,
+          55
+        ]
+      ]
+    }
+  },
+  "regression": {
+    "task": "Predict Future Cascade Reply Volume (Post-Cutoff Total Replies)",
+    "baseline_ridge": {
+      "mae": 41.37,
+      "rmse": 57.2,
+      "r2": 0.1225
+    },
+    "stronger_hist_gradient_boosting": {
+      "mae": 41.88,
+      "rmse": 57.59,
+      "r2": 0.1104
+    }
+  },
+  "feature_importances": [
+    {
+      "feature": "early_mean_hate",
+      "importance": 0.8517,
+      "direction": "positive"
+    },
+    {
+      "feature": "early_std_hate",
+      "importance": 0.2538,
+      "direction": "negative"
+    },
+    {
+      "feature": "root_hate_score",
+      "importance": 0.246,
+      "direction": "positive"
+    },
+    {
+      "feature": "early_max_hate",
+      "importance": 0.1955,
+      "direction": "positive"
+    },
+    {
+      "feature": "early_time_span_mins",
+      "importance": 0.1262,
+      "direction": "positive"
+    },
+    {
+      "feature": "root_char_len",
+      "importance": 0.1162,
+      "direction": "negative"
+    },
+    {
+      "feature": "root_word_count",
+      "importance": 0.1123,
+      "direction": "positive"
+    },
+    {
+      "feature": "early_hate_ratio",
+      "importance": 0.1034,
+      "direction": "positive"
+    },
+    {
+      "feature": "root_has_exclamation",
+      "importance": 0.0924,
+      "direction": "positive"
+    },
+    {
+      "feature": "root_has_question",
+      "importance": 0.0792,
+      "direction": "positive"
+    },
+    {
+      "feature": "early_user_diversity",
+      "importance": 0.0664,
+      "direction": "negative"
+    },
+    {
+      "feature": "early_reply_velocity",
+      "importance": 0.0582,
+      "direction": "negative"
+    },
+    {
+      "feature": "escalation_delta",
+      "importance": 0.0242,
+      "direction": "negative"
+    },
+    {
+      "feature": "early_reply_count",
+      "importance": 0.0,
+      "direction": "negative"
+    }
+  ]
+}

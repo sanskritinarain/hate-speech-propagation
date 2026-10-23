@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+backend/venv/
+venv/
+ENV/
+env/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Machine Learning & Data Privacy
+backend/data/*
+!backend/data/.gitkeep
+backend/models/*.joblib
+backend/models/*.pkl
+temp_*/
+
+# Node & Next.js
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/build/
+frontend/.vercel
+*.tsbuildinfo
+next-env.d.ts
+
+# Environments and Secrets
+.env
+.env.local
+.env.*.local
+*.log
+
+# OS Metadata
+.DS_Store
+Thumbs.db
