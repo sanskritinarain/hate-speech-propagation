@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { EarlyPostAnalysisRequest } from "@/types/prediction";
 import { 
   Play, 
@@ -9,7 +9,8 @@ import {
   Zap, 
   Users, 
   Share2,
-  SlidersHorizontal
+  SlidersHorizontal,
+  Sparkles
 } from "lucide-react";
 
 interface PredictionFormProps {
@@ -24,6 +25,53 @@ const PLATFORMS = [
   { id: "youtube", label: "YouTube", icon: "▶️" },
   { id: "other", label: "Other", icon: "🌐" },
 ];
+
+const TOXIC_WORDS = new Set([
+  "hate", "scum", "trash", "illegal", "filth", "vermin", "invaders", 
+  "disgusting", "terrorist", "deport", "enemy", "destroy", "traitor",
+  "corrupt", "kill", "attack", "racist", "clowns", "idiot", "shame",
+  "stupid", "evil", "die", "bastard", "pappu", "liar", "fraud"
+]);
+
+// Real-time text hostility analyzer
+function analyzeTextHostility(text: string): { toxicity: number; platform?: string } {
+  const lower = text.toLowerCase();
+  
+  // Platform auto-detection
+  let detectedPlatform: string | undefined = undefined;
+  if (lower.includes("reddit.com") || lower.includes("r/") || lower.includes("u/")) {
+    detectedPlatform = "reddit";
+  } else if (lower.includes("twitter.com") || lower.includes("x.com") || lower.includes("retweet")) {
+    detectedPlatform = "twitter";
+  } else if (lower.includes("youtube.com") || lower.includes("youtu.be")) {
+    detectedPlatform = "youtube";
+  } else if (lower.includes("instagram.com")) {
+    detectedPlatform = "instagram";
+  }
+
+  // Tokenize words
+  const words = lower.match(/\b[a-z0-9]+\b/g) || [];
+  if (words.length === 0) return { toxicity: 0.05, platform: detectedPlatform };
+
+  let toxicMatches = 0;
+  for (const w of words) {
+    if (TOXIC_WORDS.has(w)) {
+      toxicMatches++;
+    }
+  }
+
+  let calculatedScore = 0.02;
+  if (toxicMatches > 0) {
+    calculatedScore = Math.min(0.20 + (toxicMatches * 0.25), 0.95);
+  }
+
+  // If exclamation marks or all caps are present with toxic words
+  if (text.includes("!") && toxicMatches > 0) {
+    calculatedScore = Math.min(calculatedScore + 0.10, 0.98);
+  }
+
+  return { toxicity: Math.round(calculatedScore * 100) / 100, platform: detectedPlatform };
+}
 
 export const PredictionForm: React.FC<PredictionFormProps> = ({
   onSubmit,
@@ -41,17 +89,30 @@ export const PredictionForm: React.FC<PredictionFormProps> = ({
   const [hateRatio, setHateRatio] = useState<number>(0.35);
   const [userDiversity, setUserDiversity] = useState<number>(0.80);
 
+  // When text changes, intelligently adjust sliders to match the content
   const handleTextChange = (text: string) => {
     setRootText(text);
-    const lower = text.toLowerCase();
-    if (lower.includes("reddit.com") || lower.includes("r/") || lower.includes("u/")) {
-      setPlatform("reddit");
-    } else if (lower.includes("twitter.com") || lower.includes("x.com") || lower.includes("retweet")) {
-      setPlatform("twitter");
-    } else if (lower.includes("youtube.com") || lower.includes("youtu.be")) {
-      setPlatform("youtube");
-    } else if (lower.includes("instagram.com")) {
-      setPlatform("instagram");
+    const { toxicity, platform: detectedPlat } = analyzeTextHostility(text);
+    if (detectedPlat) {
+      setPlatform(detectedPlat);
+    }
+
+    setRootHateScore(toxicity);
+
+    // If text is wholesome/benign (low toxicity), adjust audience reaction sliders down automatically!
+    if (toxicity < 0.20) {
+      setMeanHate(Math.max(0.02, Math.round(toxicity * 0.8 * 100) / 100));
+      setMaxHate(Math.max(0.08, Math.round(toxicity * 1.5 * 100) / 100));
+      setHateRatio(0.0);
+      setTimeSpanMins(45);
+      setUserDiversity(0.90);
+    } else {
+      // If text is aggressive or toxic, adjust audience reaction sliders up
+      setMeanHate(Math.min(0.85, Math.round((toxicity * 0.75 + 0.1) * 100) / 100));
+      setMaxHate(Math.min(0.95, Math.round((toxicity + 0.15) * 100) / 100));
+      setHateRatio(Math.min(0.60, Math.round(toxicity * 0.5 * 100) / 100));
+      setTimeSpanMins(15);
+      setUserDiversity(0.75);
     }
   };
 
@@ -77,13 +138,13 @@ export const PredictionForm: React.FC<PredictionFormProps> = ({
   const handleReset = () => {
     setRootText("");
     setPlatform("twitter");
-    setRootHateScore(0.10);
+    setRootHateScore(0.02);
     setReplyCount(15);
-    setTimeSpanMins(30);
-    setMeanHate(0.20);
-    setMaxHate(0.50);
-    setHateRatio(0.15);
-    setUserDiversity(0.85);
+    setTimeSpanMins(45);
+    setMeanHate(0.04);
+    setMaxHate(0.08);
+    setHateRatio(0.0);
+    setUserDiversity(0.90);
   };
 
   return (
@@ -137,10 +198,15 @@ export const PredictionForm: React.FC<PredictionFormProps> = ({
           />
         </div>
 
-        {/* 3. Early Activity Parameters (Sliders) */}
+        {/* 3. Early Activity Parameters (Auto-calibrated to text) */}
         <div>
-          <div className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2">
-            <SlidersHorizontal className="w-3.5 h-3.5 text-indigo-400" /> Early Signals (First 15 Comments)
+          <div className="flex items-center justify-between text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2">
+            <span className="flex items-center gap-1.5">
+              <SlidersHorizontal className="w-3.5 h-3.5 text-indigo-400" /> Early Signals (Auto-Calibrated to Text)
+            </span>
+            <span className="text-[10px] text-indigo-400 font-normal lowercase flex items-center gap-1">
+              <Sparkles className="w-3 h-3" /> auto-syncs with text
+            </span>
           </div>
 
           <div className="grid grid-cols-2 gap-2.5">
@@ -148,7 +214,9 @@ export const PredictionForm: React.FC<PredictionFormProps> = ({
             <div className="bg-slate-950/50 p-2.5 rounded-xl border border-slate-800/80">
               <div className="flex justify-between text-xs mb-1">
                 <span className="text-slate-400">Post Toxicity</span>
-                <span className="font-mono text-indigo-400 font-bold">{rootHateScore.toFixed(2)}</span>
+                <span className={`font-mono font-bold ${rootHateScore >= 0.4 ? "text-rose-400" : "text-emerald-400"}`}>
+                  {rootHateScore.toFixed(2)}
+                </span>
               </div>
               <input
                 type="range"
@@ -165,7 +233,9 @@ export const PredictionForm: React.FC<PredictionFormProps> = ({
             <div className="bg-slate-950/50 p-2.5 rounded-xl border border-slate-800/80">
               <div className="flex justify-between text-xs mb-1">
                 <span className="text-slate-400">Audience Hostility</span>
-                <span className="font-mono text-indigo-400 font-bold">{meanHate.toFixed(2)}</span>
+                <span className={`font-mono font-bold ${meanHate >= 0.3 ? "text-rose-400" : "text-emerald-400"}`}>
+                  {meanHate.toFixed(2)}
+                </span>
               </div>
               <input
                 type="range"
@@ -203,7 +273,9 @@ export const PredictionForm: React.FC<PredictionFormProps> = ({
                 <span className="text-slate-400 flex items-center gap-1">
                   <Zap className="w-3 h-3 text-amber-400" /> Toxic Ratio
                 </span>
-                <span className="font-mono text-indigo-400 font-bold">{(hateRatio * 100).toFixed(0)}%</span>
+                <span className={`font-mono font-bold ${hateRatio >= 0.2 ? "text-rose-400" : "text-emerald-400"}`}>
+                  {(hateRatio * 100).toFixed(0)}%
+                </span>
               </div>
               <input
                 type="range"
@@ -220,7 +292,9 @@ export const PredictionForm: React.FC<PredictionFormProps> = ({
             <div className="bg-slate-950/50 p-2.5 rounded-xl border border-slate-800/80">
               <div className="flex justify-between text-xs mb-1">
                 <span className="text-slate-400">Peak Toxicity</span>
-                <span className="font-mono text-indigo-400 font-bold">{maxHate.toFixed(2)}</span>
+                <span className={`font-mono font-bold ${maxHate >= 0.5 ? "text-rose-400" : "text-emerald-400"}`}>
+                  {maxHate.toFixed(2)}
+                </span>
               </div>
               <input
                 type="range"
@@ -261,7 +335,7 @@ export const PredictionForm: React.FC<PredictionFormProps> = ({
             onClick={handleReset}
             className="flex items-center gap-1 text-xs text-slate-500 hover:text-slate-300 transition"
           >
-            <RotateCcw className="w-3.5 h-3.5" /> Reset
+            <RotateCcw className="w-3.5 h-3.5" /> Clear
           </button>
 
           <button
