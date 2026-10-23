@@ -1,16 +1,15 @@
 "use client";
 
 import React, { useState } from "react";
-import { EarlyPostAnalysisRequest, SamplePreset } from "@/types/prediction";
+import { EarlyPostAnalysisRequest } from "@/types/prediction";
 import { 
   Play, 
   RotateCcw, 
-  Sparkles, 
   Clock, 
   Zap, 
   Users, 
-  ShieldAlert, 
-  Share2 
+  Share2,
+  SlidersHorizontal
 } from "lucide-react";
 
 interface PredictionFormProps {
@@ -19,11 +18,11 @@ interface PredictionFormProps {
 }
 
 const PLATFORMS = [
-  { id: "twitter", label: "X / Twitter", icon: "𝕏", color: "hover:border-sky-500" },
-  { id: "reddit", label: "Reddit", icon: "🔴", color: "hover:border-orange-500" },
-  { id: "youtube", label: "YouTube", icon: "▶️", color: "hover:border-red-500" },
-  { id: "instagram", label: "Instagram", icon: "📸", color: "hover:border-pink-500" },
-  { id: "other", label: "Other", icon: "🌐", color: "hover:border-slate-500" },
+  { id: "twitter", label: "X / Twitter", icon: "𝕏" },
+  { id: "reddit", label: "Reddit", icon: "🔴" },
+  { id: "instagram", label: "Instagram", icon: "📸" },
+  { id: "youtube", label: "YouTube", icon: "▶️" },
+  { id: "other", label: "Other", icon: "🌐" },
 ];
 
 export const PredictionForm: React.FC<PredictionFormProps> = ({
@@ -42,9 +41,6 @@ export const PredictionForm: React.FC<PredictionFormProps> = ({
   const [hateRatio, setHateRatio] = useState<number>(0.35);
   const [userDiversity, setUserDiversity] = useState<number>(0.80);
 
-  const velocity = (replyCount / Math.max(timeSpanMins, 0.1)).toFixed(1);
-
-  // Auto-detect platform if user pastes a link or platform-specific syntax
   const handleTextChange = (text: string) => {
     setRootText(text);
     const lower = text.toLowerCase();
@@ -74,7 +70,7 @@ export const PredictionForm: React.FC<PredictionFormProps> = ({
       early_std_hate: Math.round(Math.abs(maxHate - meanHate) * 0.45 * 100) / 100,
       early_hate_ratio: hateRatio,
       early_user_diversity: userDiversity,
-      observation_cutoff_label: `Cutoff = 15 replies`
+      observation_cutoff_label: "Cutoff = 15 replies"
     });
   };
 
@@ -91,12 +87,12 @@ export const PredictionForm: React.FC<PredictionFormProps> = ({
   };
 
   return (
-    <div className="bg-slate-900/90 rounded-2xl border border-slate-800 p-5 shadow-xl backdrop-blur-sm">
-      {/* Platform Selector Bar */}
-      <div className="mb-4">
-        <label className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2 flex items-center justify-between">
+    <div className="bg-slate-900/90 rounded-2xl border border-slate-800 p-5 shadow-xl backdrop-blur-sm space-y-4">
+      {/* 1. Source Platform Select */}
+      <div>
+        <label className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1.5 flex items-center justify-between">
           <span className="flex items-center gap-1.5">
-            <Share2 className="w-3.5 h-3.5 text-indigo-400" /> Source Platform
+            <Share2 className="w-3.5 h-3.5 text-indigo-400" /> Select Source Platform
           </span>
           <span className="text-slate-500 font-normal lowercase">auto-detects from links</span>
         </label>
@@ -122,13 +118,13 @@ export const PredictionForm: React.FC<PredictionFormProps> = ({
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Post Text Input */}
+      <form onSubmit={handleSubmit} className="space-y-3.5">
+        {/* 2. Text Input Box */}
         <div>
           <div className="flex justify-between items-center mb-1 text-xs">
-            <label className="font-medium text-slate-300">Root Post Content</label>
-            <span className="text-[11px] text-slate-500">
-              Platform: <strong className="text-indigo-400 capitalize">{platform}</strong>
+            <label className="font-semibold text-slate-300">Post Text or Link</label>
+            <span className="text-[11px] text-slate-400">
+              Active: <strong className="text-indigo-400 capitalize">{platform}</strong>
             </span>
           </div>
           <textarea
@@ -136,119 +132,125 @@ export const PredictionForm: React.FC<PredictionFormProps> = ({
             onChange={(e) => handleTextChange(e.target.value)}
             rows={3}
             required
-            placeholder="Type or paste post text..."
+            placeholder="Paste the post text or URL here (e.g. twitter.com/..., reddit.com/r/..., instagram.com/...)..."
             className="w-full bg-slate-950/80 border border-slate-800 rounded-xl p-3 text-sm text-slate-200 placeholder-slate-600 focus:outline-none focus:border-indigo-500 transition"
           />
         </div>
 
-        {/* Simplified Sliders Grid (Clean, low text) */}
-        <div className="grid grid-cols-2 gap-3">
-          {/* Root Toxicity */}
-          <div className="bg-slate-950/40 p-2.5 rounded-xl border border-slate-800/70">
-            <div className="flex justify-between text-xs mb-1">
-              <span className="text-slate-400">Root Toxicity</span>
-              <span className="font-mono text-indigo-400 font-bold">{rootHateScore.toFixed(2)}</span>
-            </div>
-            <input
-              type="range"
-              min="0.0"
-              max="1.0"
-              step="0.02"
-              value={rootHateScore}
-              onChange={(e) => setRootHateScore(parseFloat(e.target.value))}
-              className="w-full accent-indigo-500 cursor-pointer h-1.5 bg-slate-800 rounded"
-            />
+        {/* 3. Early Activity Parameters (Sliders) */}
+        <div>
+          <div className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2">
+            <SlidersHorizontal className="w-3.5 h-3.5 text-indigo-400" /> Early Signals (First 15 Comments)
           </div>
 
-          {/* Early Mean Toxicity */}
-          <div className="bg-slate-950/40 p-2.5 rounded-xl border border-slate-800/70">
-            <div className="flex justify-between text-xs mb-1">
-              <span className="text-slate-400">Early Reply Toxicity</span>
-              <span className="font-mono text-indigo-400 font-bold">{meanHate.toFixed(2)}</span>
+          <div className="grid grid-cols-2 gap-2.5">
+            {/* Root Toxicity */}
+            <div className="bg-slate-950/50 p-2.5 rounded-xl border border-slate-800/80">
+              <div className="flex justify-between text-xs mb-1">
+                <span className="text-slate-400">Post Toxicity</span>
+                <span className="font-mono text-indigo-400 font-bold">{rootHateScore.toFixed(2)}</span>
+              </div>
+              <input
+                type="range"
+                min="0.0"
+                max="1.0"
+                step="0.02"
+                value={rootHateScore}
+                onChange={(e) => setRootHateScore(parseFloat(e.target.value))}
+                className="w-full accent-indigo-500 cursor-pointer h-1.5 bg-slate-800 rounded"
+              />
             </div>
-            <input
-              type="range"
-              min="0.0"
-              max="1.0"
-              step="0.02"
-              value={meanHate}
-              onChange={(e) => setMeanHate(parseFloat(e.target.value))}
-              className="w-full accent-indigo-500 cursor-pointer h-1.5 bg-slate-800 rounded"
-            />
-          </div>
 
-          {/* Time Window & Velocity */}
-          <div className="bg-slate-950/40 p-2.5 rounded-xl border border-slate-800/70">
-            <div className="flex justify-between text-xs mb-1">
-              <span className="text-slate-400 flex items-center gap-1">
-                <Clock className="w-3 h-3 text-slate-500" /> Window Duration
-              </span>
-              <span className="font-mono text-indigo-400 font-bold">{timeSpanMins}m</span>
+            {/* Early Reply Toxicity */}
+            <div className="bg-slate-950/50 p-2.5 rounded-xl border border-slate-800/80">
+              <div className="flex justify-between text-xs mb-1">
+                <span className="text-slate-400">Audience Hostility</span>
+                <span className="font-mono text-indigo-400 font-bold">{meanHate.toFixed(2)}</span>
+              </div>
+              <input
+                type="range"
+                min="0.0"
+                max="1.0"
+                step="0.02"
+                value={meanHate}
+                onChange={(e) => setMeanHate(parseFloat(e.target.value))}
+                className="w-full accent-indigo-500 cursor-pointer h-1.5 bg-slate-800 rounded"
+              />
             </div>
-            <input
-              type="range"
-              min="5"
-              max="120"
-              step="5"
-              value={timeSpanMins}
-              onChange={(e) => setTimeSpanMins(parseInt(e.target.value))}
-              className="w-full accent-indigo-500 cursor-pointer h-1.5 bg-slate-800 rounded"
-            />
-          </div>
 
-          {/* Toxic Reply Ratio */}
-          <div className="bg-slate-950/40 p-2.5 rounded-xl border border-slate-800/70">
-            <div className="flex justify-between text-xs mb-1">
-              <span className="text-slate-400 flex items-center gap-1">
-                <Zap className="w-3 h-3 text-amber-400" /> Toxic Ratio
-              </span>
-              <span className="font-mono text-indigo-400 font-bold">{(hateRatio * 100).toFixed(0)}%</span>
+            {/* Window Duration */}
+            <div className="bg-slate-950/50 p-2.5 rounded-xl border border-slate-800/80">
+              <div className="flex justify-between text-xs mb-1">
+                <span className="text-slate-400 flex items-center gap-1">
+                  <Clock className="w-3 h-3 text-slate-500" /> Arrival Speed
+                </span>
+                <span className="font-mono text-indigo-400 font-bold">{timeSpanMins}m</span>
+              </div>
+              <input
+                type="range"
+                min="5"
+                max="120"
+                step="5"
+                value={timeSpanMins}
+                onChange={(e) => setTimeSpanMins(parseInt(e.target.value))}
+                className="w-full accent-indigo-500 cursor-pointer h-1.5 bg-slate-800 rounded"
+              />
             </div>
-            <input
-              type="range"
-              min="0.0"
-              max="1.0"
-              step="0.05"
-              value={hateRatio}
-              onChange={(e) => setHateRatio(parseFloat(e.target.value))}
-              className="w-full accent-indigo-500 cursor-pointer h-1.5 bg-slate-800 rounded"
-            />
-          </div>
 
-          {/* Early Peak Toxicity */}
-          <div className="bg-slate-950/40 p-2.5 rounded-xl border border-slate-800/70">
-            <div className="flex justify-between text-xs mb-1">
-              <span className="text-slate-400">Peak Toxicity</span>
-              <span className="font-mono text-indigo-400 font-bold">{maxHate.toFixed(2)}</span>
+            {/* Toxic Ratio */}
+            <div className="bg-slate-950/50 p-2.5 rounded-xl border border-slate-800/80">
+              <div className="flex justify-between text-xs mb-1">
+                <span className="text-slate-400 flex items-center gap-1">
+                  <Zap className="w-3 h-3 text-amber-400" /> Toxic Ratio
+                </span>
+                <span className="font-mono text-indigo-400 font-bold">{(hateRatio * 100).toFixed(0)}%</span>
+              </div>
+              <input
+                type="range"
+                min="0.0"
+                max="1.0"
+                step="0.05"
+                value={hateRatio}
+                onChange={(e) => setHateRatio(parseFloat(e.target.value))}
+                className="w-full accent-indigo-500 cursor-pointer h-1.5 bg-slate-800 rounded"
+              />
             </div>
-            <input
-              type="range"
-              min="0.0"
-              max="1.0"
-              step="0.02"
-              value={maxHate}
-              onChange={(e) => setMaxHate(parseFloat(e.target.value))}
-              className="w-full accent-indigo-500 cursor-pointer h-1.5 bg-slate-800 rounded"
-            />
-          </div>
 
-          {/* Participant Diversity */}
-          <div className="bg-slate-950/40 p-2.5 rounded-xl border border-slate-800/70">
-            <div className="flex justify-between text-xs mb-1">
-              <span className="text-slate-400 flex items-center gap-1">
-                <Users className="w-3 h-3 text-slate-500" /> User Diversity
-              </span>
-              <span className="font-mono text-indigo-400 font-bold">{(userDiversity * 100).toFixed(0)}%</span>
+            {/* Peak Toxicity */}
+            <div className="bg-slate-950/50 p-2.5 rounded-xl border border-slate-800/80">
+              <div className="flex justify-between text-xs mb-1">
+                <span className="text-slate-400">Peak Toxicity</span>
+                <span className="font-mono text-indigo-400 font-bold">{maxHate.toFixed(2)}</span>
+              </div>
+              <input
+                type="range"
+                min="0.0"
+                max="1.0"
+                step="0.02"
+                value={maxHate}
+                onChange={(e) => setMaxHate(parseFloat(e.target.value))}
+                className="w-full accent-indigo-500 cursor-pointer h-1.5 bg-slate-800 rounded"
+              />
             </div>
-            <input
-              type="range"
-              min="0.2"
-              max="1.0"
-              step="0.05"
-              value={userDiversity}
-              onChange={(e) => setUserDiversity(parseFloat(e.target.value))}
-              className="w-full accent-indigo-500 cursor-pointer h-1.5 bg-slate-800 rounded"
-            />
+
+            {/* User Diversity */}
+            <div className="bg-slate-950/50 p-2.5 rounded-xl border border-slate-800/80">
+              <div className="flex justify-between text-xs mb-1">
+                <span className="text-slate-400 flex items-center gap-1">
+                  <Users className="w-3 h-3 text-slate-500" /> User Variety
+                </span>
+                <span className="font-mono text-indigo-400 font-bold">{(userDiversity * 100).toFixed(0)}%</span>
+              </div>
+              <input
+                type="range"
+                min="0.2"
+                max="1.0"
+                step="0.05"
+                value={userDiversity}
+                onChange={(e) => setUserDiversity(parseFloat(e.target.value))}
+                className="w-full accent-indigo-500 cursor-pointer h-1.5 bg-slate-800 rounded"
+              />
+            </div>
           </div>
         </div>
 
@@ -259,13 +261,13 @@ export const PredictionForm: React.FC<PredictionFormProps> = ({
             onClick={handleReset}
             className="flex items-center gap-1 text-xs text-slate-500 hover:text-slate-300 transition"
           >
-            <RotateCcw className="w-3.5 h-3.5" /> Clear
+            <RotateCcw className="w-3.5 h-3.5" /> Reset
           </button>
 
           <button
             type="submit"
             disabled={loading || !rootText.trim()}
-            className="flex items-center gap-2 px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-xs shadow-md transition disabled:opacity-50 cursor-pointer"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs shadow-md shadow-indigo-600/30 transition disabled:opacity-50 cursor-pointer"
           >
             {loading ? (
               <>

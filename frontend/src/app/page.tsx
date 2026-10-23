@@ -13,14 +13,12 @@ import { ResponsibleUseModal } from "@/components/ResponsibleUseModal";
 import { 
   fetchHealth, 
   fetchModelMetadata, 
-  fetchSamplePresets, 
   predictPropagation 
 } from "@/lib/api";
 import { 
   EarlyPostAnalysisRequest, 
   PropagationPredictionResponse, 
-  ModelMetadataResponse, 
-  SamplePreset 
+  ModelMetadataResponse 
 } from "@/types/prediction";
 import { AlertCircle, LineChart, Award, BookOpen } from "lucide-react";
 
@@ -28,7 +26,6 @@ export default function Home() {
   const [backendOnline, setBackendOnline] = useState<boolean>(false);
   const [modelMode, setModelMode] = useState<"real_model_inference" | "synthetic_demo_mode" | "uninitialized">("uninitialized");
   const [metadata, setMetadata] = useState<ModelMetadataResponse | null>(null);
-  const [presets, setPresets] = useState<SamplePreset[]>([]);
   const [prediction, setPrediction] = useState<PropagationPredictionResponse | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -42,20 +39,23 @@ export default function Home() {
       setBackendOnline(true);
       setModelMode(health.mode as "real_model_inference" | "synthetic_demo_mode");
 
-      const [meta, samplePresets] = await Promise.all([
-        fetchModelMetadata().catch(() => null),
-        fetchSamplePresets().catch(() => [])
-      ]);
-
+      const meta = await fetchModelMetadata().catch(() => null);
       if (meta) setMetadata(meta);
-      if (samplePresets) setPresets(samplePresets);
 
-      if (samplePresets && samplePresets.length > 0) {
-        setLoading(true);
-        const initialPred = await predictPropagation(samplePresets[0].data);
-        setPrediction(initialPred);
-        setLoading(false);
-      }
+      setLoading(true);
+      const initialPred = await predictPropagation({
+        root_text: "These illegal foreigners are destroying our nation, why is nobody taking direct action against them?!",
+        platform: "twitter",
+        root_hate_score: 0.72,
+        early_reply_count: 15,
+        early_time_span_mins: 20.0,
+        early_mean_hate: 0.42,
+        early_max_hate: 0.85,
+        early_std_hate: 0.19,
+        early_hate_ratio: 0.35,
+        early_user_diversity: 0.80,
+      });
+      setPrediction(initialPred);
     } catch {
       setBackendOnline(false);
       setModelMode("synthetic_demo_mode");
