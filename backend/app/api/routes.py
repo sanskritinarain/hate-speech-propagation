@@ -44,11 +44,13 @@ def get_sample_presets() -> List[Dict[str, Any]]:
     return [
         {
             "id": "severe-escalation",
-            "title": "Severe Xenophobic Escalation Cascade",
+            "title": "Severe Xenophobic Escalation",
             "category": "High Risk",
-            "description": "A provocative political claim that quickly triggered hostile, aggressive replies within the first 20 minutes.",
+            "platform": "twitter",
+            "description": "Provocative political post on X that triggered hostile reply chains.",
             "data": {
                 "root_text": "These illegal foreigners are destroying our nation, why is nobody taking direct action against them?!",
+                "platform": "twitter",
                 "root_hate_score": 0.72,
                 "early_reply_count": 15,
                 "early_time_span_mins": 18.0,
@@ -57,16 +59,18 @@ def get_sample_presets() -> List[Dict[str, Any]]:
                 "early_std_hate": 0.22,
                 "early_hate_ratio": 0.46,
                 "early_user_diversity": 0.86,
-                "observation_cutoff_label": "Early Cutoff (15 replies / 18 min)"
+                "observation_cutoff_label": "Early Cutoff (15 replies)"
             }
         },
         {
             "id": "subtle-dogwhistle",
-            "title": "Subtle Dogwhistle with Escalating Polarization",
-            "category": "Borderline / Escalating",
-            "description": "Seemingly innocuous phrasing that rapidly attracted polarized groups and hostile reply chains.",
+            "title": "Subtle Dogwhistle Escalation",
+            "category": "Borderline",
+            "platform": "reddit",
+            "description": "Subtle phrasing on Reddit that attracted polarized, hostile comment branches.",
             "data": {
                 "root_text": "Certain demographic groups seem to always avoid contributing while taking all the welfare benefits.",
+                "platform": "reddit",
                 "root_hate_score": 0.18,
                 "early_reply_count": 15,
                 "early_time_span_mins": 35.0,
@@ -75,16 +79,18 @@ def get_sample_presets() -> List[Dict[str, Any]]:
                 "early_std_hate": 0.17,
                 "early_hate_ratio": 0.26,
                 "early_user_diversity": 0.73,
-                "observation_cutoff_label": "Early Cutoff (15 replies / 35 min)"
+                "observation_cutoff_label": "Early Cutoff (15 replies)"
             }
         },
         {
             "id": "benign-discourse",
             "title": "Benign Civic Policy Discussion",
-            "category": "Low Risk / Contained",
-            "description": "A factual community policy update that generated civil debate without hostile propagation.",
+            "category": "Low Risk",
+            "platform": "youtube",
+            "description": "Factual community update on YouTube that generated civil discussion.",
             "data": {
                 "root_text": "New municipal transportation bill scheduled for community debate next Tuesday evening.",
+                "platform": "youtube",
                 "root_hate_score": 0.02,
                 "early_reply_count": 15,
                 "early_time_span_mins": 60.0,
@@ -93,7 +99,7 @@ def get_sample_presets() -> List[Dict[str, Any]]:
                 "early_std_hate": 0.05,
                 "early_hate_ratio": 0.00,
                 "early_user_diversity": 0.93,
-                "observation_cutoff_label": "Early Cutoff (15 replies / 60 min)"
+                "observation_cutoff_label": "Early Cutoff (15 replies)"
             }
         }
     ]

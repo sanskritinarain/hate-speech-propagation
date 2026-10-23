@@ -1,5 +1,6 @@
 export interface EarlyPostAnalysisRequest {
   root_text: string;
+  platform?: string;
   root_hate_score?: number;
   early_reply_count: number;
   early_time_span_mins: number;
@@ -28,6 +29,9 @@ export interface TimelinePoint {
 
 export interface PropagationPredictionResponse {
   mode: "real_model_inference" | "synthetic_demo_mode";
+  platform: string;
+  platform_label: string;
+  platform_context: string;
   model_source: string;
   dataset_provenance: string;
   escalation_risk: "HIGH" | "MODERATE" | "LOW";
@@ -82,6 +86,7 @@ export interface SamplePreset {
   id: string;
   title: string;
   category: string;
+  platform?: string;
   description: string;
   data: EarlyPostAnalysisRequest;
 }

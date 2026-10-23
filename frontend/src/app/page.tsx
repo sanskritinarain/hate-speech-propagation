@@ -22,7 +22,7 @@ import {
   ModelMetadataResponse, 
   SamplePreset 
 } from "@/types/prediction";
-import { AlertCircle, RefreshCw } from "lucide-react";
+import { AlertCircle, LineChart, Award, BookOpen } from "lucide-react";
 
 export default function Home() {
   const [backendOnline, setBackendOnline] = useState<boolean>(false);
@@ -33,6 +33,7 @@ export default function Home() {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [isResponsibleUseOpen, setIsResponsibleUseOpen] = useState<boolean>(false);
+  const [activeTab, setActiveTab] = useState<"charts" | "metrics" | "methodology">("charts");
 
   const initData = async () => {
     try {
@@ -49,20 +50,16 @@ export default function Home() {
       if (meta) setMetadata(meta);
       if (samplePresets) setPresets(samplePresets);
 
-      // Auto-run initial prediction with the first preset to display immediately
       if (samplePresets && samplePresets.length > 0) {
-        const defaultPreset = samplePresets[0];
         setLoading(true);
-        const initialPred = await predictPropagation(defaultPreset.data);
+        const initialPred = await predictPropagation(samplePresets[0].data);
         setPrediction(initialPred);
         setLoading(false);
       }
-    } catch (err: any) {
+    } catch {
       setBackendOnline(false);
       setModelMode("synthetic_demo_mode");
-      setError(
-        "Could not connect to FastAPI backend on http://localhost:8001. Start the backend with 'uvicorn app.main:app --port 8001 --reload'."
-      );
+      setError("Cannot reach backend on port 8001.");
     } finally {
       setLoading(false);
     }
@@ -80,56 +77,35 @@ export default function Home() {
       setPrediction(res);
       setModelMode(res.mode);
     } catch (err: any) {
-      setError(err.message || "Prediction error occurred");
+      setError(err.message || "Prediction error");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100">
+    <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100 selection:bg-indigo-500">
       <Header
         onOpenResponsibleUse={() => setIsResponsibleUseOpen(true)}
         backendOnline={backendOnline}
         modelMode={modelMode}
       />
 
-      <DemoModeBanner
-        mode={modelMode}
-        datasetProvenance={metadata?.source_repository}
-        totalThreads={metadata?.total_threads_analyzed}
-      />
+      <DemoModeBanner mode={modelMode} />
 
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-        {/* Error Alert if backend offline */}
+      <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-6 space-y-6">
         {error && (
-          <div className="bg-rose-950/40 border border-rose-800/60 p-4 rounded-xl flex items-center justify-between text-xs text-rose-300">
+          <div className="bg-rose-950/40 border border-rose-800/60 px-4 py-2 rounded-xl flex items-center justify-between text-xs text-rose-300">
             <div className="flex items-center space-x-2">
               <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
               <span>{error}</span>
             </div>
-            <button
-              onClick={initData}
-              className="flex items-center space-x-1 px-3 py-1 bg-rose-900/60 hover:bg-rose-800 rounded-lg text-rose-200 transition"
-            >
-              <RefreshCw className="w-3.5 h-3.5" />
-              <span>Retry</span>
-            </button>
+            <button onClick={initData} className="underline hover:text-white">Retry</button>
           </div>
         )}
 
-        {/* Hero Section */}
-        <div className="text-center max-w-3xl mx-auto space-y-2">
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-            Early Prediction of Hate Speech Propagation
-          </h2>
-          <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
-            Forecasting downstream conversation hostility and viral cascade volume from early engagement signals (T_obs &le; 15 replies). Grounded in the DRAGNET and HEAR research benchmarks.
-          </p>
-        </div>
-
-        {/* Primary Workspace: Form on Left, Results on Right */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        {/* Primary Interactive Workspace: Form on Left, Output on Right */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           <div className="lg:col-span-6">
             <PredictionForm
               onSubmit={handlePredict}
@@ -146,36 +122,70 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Section 2: Recharts Dynamic Projection */}
-        {prediction && (
-          <PropagationCharts
-            timeline={prediction.timeline_projection}
-            featureImportances={metadata?.feature_importances}
-          />
-        )}
+        {/* Clean Secondary Navigation Tabs (Keeps page uncluttered) */}
+        <div className="pt-2">
+          <div className="flex items-center justify-center space-x-2 border-b border-slate-800/80 pb-3">
+            <button
+              onClick={() => setActiveTab("charts")}
+              className={`flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-medium transition ${
+                activeTab === "charts"
+                  ? "bg-indigo-600 text-white shadow-sm"
+                  : "bg-slate-900 text-slate-400 hover:text-slate-200 border border-slate-800"
+              }`}
+            >
+              <LineChart className="w-3.5 h-3.5" />
+              <span>Cascade Dynamics & Projections</span>
+            </button>
 
-        {/* Section 3: Empirical Model Performance Table */}
-        <ModelPerformanceSection metadata={metadata} />
+            <button
+              onClick={() => setActiveTab("metrics")}
+              className={`flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-medium transition ${
+                activeTab === "metrics"
+                  ? "bg-indigo-600 text-white shadow-sm"
+                  : "bg-slate-900 text-slate-400 hover:text-slate-200 border border-slate-800"
+              }`}
+            >
+              <Award className="w-3.5 h-3.5" />
+              <span>Model Evaluation</span>
+            </button>
 
-        {/* Section 4: Dataset Research & Methodology */}
-        <DatasetMethodology />
+            <button
+              onClick={() => setActiveTab("methodology")}
+              className={`flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-medium transition ${
+                activeTab === "methodology"
+                  ? "bg-indigo-600 text-white shadow-sm"
+                  : "bg-slate-900 text-slate-400 hover:text-slate-200 border border-slate-800"
+              }`}
+            >
+              <BookOpen className="w-3.5 h-3.5" />
+              <span>Research Dataset</span>
+            </button>
+          </div>
+
+          {/* Tab Content Display */}
+          <div className="mt-4">
+            {activeTab === "charts" && prediction && (
+              <PropagationCharts
+                timeline={prediction.timeline_projection}
+                featureImportances={metadata?.feature_importances}
+              />
+            )}
+
+            {activeTab === "metrics" && (
+              <ModelPerformanceSection metadata={metadata} />
+            )}
+
+            {activeTab === "methodology" && (
+              <DatasetMethodology />
+            )}
+          </div>
+        </div>
       </main>
 
       <ResponsibleUseModal
         isOpen={isResponsibleUseOpen}
         onClose={() => setIsResponsibleUseOpen(false)}
       />
-
-      <footer className="border-t border-slate-900 bg-slate-950/80 py-6 text-center text-xs text-slate-500">
-        <div className="max-w-7xl mx-auto px-4 space-y-1">
-          <p>
-            Hate Speech Propagation Prediction System • Full-Stack ML Architecture (Next.js 14 + FastAPI + scikit-learn)
-          </p>
-          <p className="text-[11px] text-slate-600">
-            Research reference: DRAGNET++ (Knowledge-Based Systems 2023) & HEAR Framework (IEEE ICDMW).
-          </p>
-        </div>
-      </footer>
     </div>
   );
 }

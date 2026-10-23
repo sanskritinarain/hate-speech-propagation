@@ -9,17 +9,21 @@ class EarlyPostAnalysisRequest(BaseModel):
         description="Text content of the initial root post or tweet being analyzed",
         examples=["This controversial statement is causing widespread debate on community policies."]
     )
+    platform: str = Field(
+        default="twitter",
+        description="Social media platform origin: 'twitter', 'reddit', 'youtube', 'instagram', 'facebook', 'other'"
+    )
     root_hate_score: Optional[float] = Field(
         default=None,
         ge=0.0,
         le=1.0,
-        description="Optional pre-scored hate/toxicity intensity of the root post (0.0 to 1.0). If omitted, an estimate is computed."
+        description="Optional pre-scored hate intensity (0.0 to 1.0). If omitted, an estimate is computed."
     )
     early_reply_count: int = Field(
         default=15,
         ge=1,
         le=100,
-        description="Number of early replies observed in the cutoff window (typically 5 to 20)"
+        description="Number of early replies observed in cutoff window"
     )
     early_time_span_mins: float = Field(
         default=25.0,
@@ -31,7 +35,7 @@ class EarlyPostAnalysisRequest(BaseModel):
         default=None,
         ge=0.0,
         le=500.0,
-        description="Replies per minute during early window. If null, computed as early_reply_count / early_time_span_mins"
+        description="Replies per minute during early window"
     )
     early_mean_hate: float = Field(
         default=0.22,
@@ -61,10 +65,10 @@ class EarlyPostAnalysisRequest(BaseModel):
         default=0.85,
         ge=0.0,
         le=1.0,
-        description="Ratio of unique authors to total early replies (measures astroturfing vs broad engagement)"
+        description="Ratio of unique authors to total early replies"
     )
     observation_cutoff_label: str = Field(
-        default="Early Window (Cutoff = 15 replies / 25 min)",
+        default="Early Window (Cutoff = 15 replies)",
         description="Human-readable label for the temporal observation horizon"
     )
 
@@ -82,13 +86,16 @@ class TimelinePoint(BaseModel):
 
 class PropagationPredictionResponse(BaseModel):
     mode: str = Field(description="'real_model_inference' or 'synthetic_demo_mode'")
+    platform: str = Field(description="Originating platform ('twitter', 'reddit', 'youtube', 'instagram', etc.)")
+    platform_label: str = Field(description="Display label e.g. 'X (Twitter)' or 'Reddit'")
+    platform_context: str = Field(description="Summary of platform diffusion mechanics")
     model_source: str
     dataset_provenance: str
     escalation_risk: str = Field(description="'HIGH' | 'MODERATE' | 'LOW'")
     escalation_probability: float = Field(description="Probability of severe future hate propagation (0.0 to 1.0)")
     predicted_future_reply_volume: int = Field(description="Estimated number of replies that will accumulate after cutoff")
     estimated_total_cascade_size: int = Field(description="Early replies + predicted future reply volume")
-    cascade_reach_tier: str = Field(description="'Viral / Extensive (>200)' | 'Moderate' | 'Contained'")
+    cascade_reach_tier: str = Field(description="'Viral / Extensive' | 'Moderate' | 'Contained'")
     confidence_interval: Dict[str, int]
     contributing_factors: List[ContributingFactor]
     timeline_projection: List[TimelinePoint]
