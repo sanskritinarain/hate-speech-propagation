@@ -124,43 +124,6 @@ export const PropagationCharts: React.FC<PropagationChartsProps> = ({
           </ResponsiveContainer>
         </div>
       </div>
-
-      {/* Chart 3: Feature Importance Ranking (if available) */}
-      {topFeatures.length > 0 && (
-        <div className="lg:col-span-2 bg-slate-900/90 rounded-2xl border border-slate-800 p-5 shadow-xl backdrop-blur-sm">
-          <div className="flex items-center gap-2 mb-3">
-            <div className="p-2 bg-violet-500/10 rounded-lg text-violet-400">
-              <BarChart3 className="w-4 h-4" />
-            </div>
-            <div>
-              <h3 className="text-sm font-semibold text-white">Primary Feature Importances (DRAGNET Model)</h3>
-              <p className="text-[11px] text-slate-400">Standardized coefficient magnitudes driving the classification model</p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-            {topFeatures.map((f, i) => (
-              <div key={i} className="bg-slate-950/50 p-3 rounded-xl border border-slate-800/80">
-                <div className="flex justify-between items-center text-xs text-slate-300 mb-1.5">
-                  <span className="font-mono text-[11px]">{f.feature}</span>
-                  <span className={`text-[10px] px-1.5 py-0.5 rounded ${f.direction === "positive" ? "bg-rose-500/10 text-rose-400" : "bg-emerald-500/10 text-emerald-400"}`}>
-                    {f.direction === "positive" ? "+ Escalates" : "- Suppresses"}
-                  </span>
-                </div>
-                <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
-                  <div
-                    className="bg-indigo-500 h-full rounded-full"
-                    style={{ width: `${Math.min(f.importance * 70, 100)}%` }}
-                  />
-                </div>
-                <div className="text-right text-[10px] text-slate-500 font-mono mt-1">
-                  Weight: {f.importance.toFixed(3)}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 };

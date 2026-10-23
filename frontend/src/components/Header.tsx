@@ -24,9 +24,6 @@ export const Header: React.FC<HeaderProps> = ({
           <span className="font-bold text-base text-white tracking-tight">
             Propagation Predictor
           </span>
-          <span className="text-[11px] px-2 py-0.5 rounded-full bg-slate-800 text-indigo-400 font-medium border border-slate-700">
-            DRAGNET ML
-          </span>
         </div>
 
         <div className="flex items-center space-x-3">

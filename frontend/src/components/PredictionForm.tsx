@@ -16,7 +16,6 @@ import {
 interface PredictionFormProps {
   onSubmit: (data: EarlyPostAnalysisRequest) => void;
   loading: boolean;
-  presets: SamplePreset[];
 }
 
 const PLATFORMS = [
@@ -29,8 +28,7 @@ const PLATFORMS = [
 
 export const PredictionForm: React.FC<PredictionFormProps> = ({
   onSubmit,
-  loading,
-  presets
+  loading
 }) => {
   const [platform, setPlatform] = useState<string>("twitter");
   const [rootText, setRootText] = useState(
@@ -43,7 +41,6 @@ export const PredictionForm: React.FC<PredictionFormProps> = ({
   const [maxHate, setMaxHate] = useState<number>(0.85);
   const [hateRatio, setHateRatio] = useState<number>(0.35);
   const [userDiversity, setUserDiversity] = useState<number>(0.80);
-  const [activePresetId, setActivePresetId] = useState<string>("severe-escalation");
 
   const velocity = (replyCount / Math.max(timeSpanMins, 0.1)).toFixed(1);
 
@@ -60,25 +57,6 @@ export const PredictionForm: React.FC<PredictionFormProps> = ({
     } else if (lower.includes("instagram.com")) {
       setPlatform("instagram");
     }
-  };
-
-  const applyPreset = (preset: SamplePreset) => {
-    setActivePresetId(preset.id);
-    setRootText(preset.data.root_text);
-    if (preset.platform) {
-      setPlatform(preset.platform);
-    } else if (preset.data.platform) {
-      setPlatform(preset.data.platform);
-    }
-    if (preset.data.root_hate_score !== undefined) {
-      setRootHateScore(preset.data.root_hate_score);
-    }
-    setReplyCount(preset.data.early_reply_count);
-    setTimeSpanMins(preset.data.early_time_span_mins);
-    setMeanHate(preset.data.early_mean_hate);
-    setMaxHate(preset.data.early_max_hate);
-    setHateRatio(preset.data.early_hate_ratio);
-    setUserDiversity(preset.data.early_user_diversity);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -101,7 +79,6 @@ export const PredictionForm: React.FC<PredictionFormProps> = ({
   };
 
   const handleReset = () => {
-    setActivePresetId("");
     setRootText("");
     setPlatform("twitter");
     setRootHateScore(0.10);
@@ -144,29 +121,6 @@ export const PredictionForm: React.FC<PredictionFormProps> = ({
           })}
         </div>
       </div>
-
-      {/* Quick Presets */}
-      {presets.length > 0 && (
-        <div className="flex flex-wrap items-center gap-1.5 mb-4 pb-3 border-b border-slate-800/80">
-          <span className="text-[11px] text-slate-500 flex items-center gap-1 mr-1">
-            <Sparkles className="w-3 h-3 text-amber-400" /> Presets:
-          </span>
-          {presets.map((preset) => (
-            <button
-              key={preset.id}
-              type="button"
-              onClick={() => applyPreset(preset)}
-              className={`text-xs px-2.5 py-1 rounded-md transition font-medium ${
-                activePresetId === preset.id
-                  ? "bg-indigo-600/30 text-indigo-300 border border-indigo-500/50"
-                  : "bg-slate-800/60 text-slate-400 hover:text-slate-200"
-              }`}
-            >
-              {preset.title.split(" ")[0]}
-            </button>
-          ))}
-        </div>
-      )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Post Text Input */}

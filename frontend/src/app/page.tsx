@@ -110,7 +110,6 @@ export default function Home() {
             <PredictionForm
               onSubmit={handlePredict}
               loading={loading}
-              presets={presets}
             />
           </div>
 
