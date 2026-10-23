@@ -279,3 +279,5 @@ The frontend is fully prepped for zero-configuration Vercel deployment:
 1. **Decision Support, Not Autonomous Moderation**: Forecasts reflect statistical dynamics and should inform human content review queues or rate-limiting measures rather than autonomous speech removal.
 2. **Context & Counter-Speech**: High early activity often features civil counter-speech opposing harassment. Context must be evaluated before applying punitive actions.
 3. **Platform Differences**: Cascade velocity thresholds differ across platforms (e.g., Reddit threaded trees vs. Twitter microblogs vs. YouTube comments).
+#   h a t e - s p e e c h - p r o p a g a t i o n  
+ 
